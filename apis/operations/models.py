@@ -10,6 +10,7 @@ user = get_user_model()
 
 class Comment(models.Model):
     """评论"""
+    id = models.AutoField(primary_key=True)
     article = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="article", verbose_name="文章")
     user = models.ForeignKey(user, on_delete=models.CASCADE, related_name="commenter", verbose_name="评论者")
     content = models.TextField(verbose_name="评论内容")
@@ -24,6 +25,7 @@ class Comment(models.Model):
 
 class Reply(models.Model):
     """回复"""
+    id = models.AutoField(primary_key=True)
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='reply', verbose_name="评论")
     reply = models.ForeignKey("self", on_delete=models.CASCADE, blank=True, null=True, related_name="reply_set",
                               verbose_name="回复对象")
@@ -40,6 +42,7 @@ class Reply(models.Model):
 
 class Subscribe(models.Model):
     """订阅邮箱"""
+    id = models.AutoField(primary_key=True)
     email = models.EmailField(verbose_name='订阅邮箱', unique=True)
 
     def __str__(self):

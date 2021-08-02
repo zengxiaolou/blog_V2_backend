@@ -1,10 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-from time import time
 
 
 class Github(models.Model):
     """github用户信息"""
+    id = models.AutoField(primary_key=True)
     github_id = models.IntegerField(unique=True, verbose_name="githubID")
     avatar = models.CharField(max_length=300, null=True, verbose_name="头像")
     nickname = models.CharField(max_length=50, null=True, verbose_name="昵称")
@@ -24,6 +24,7 @@ class UserProfile(AbstractUser):
     """
     用户信息
     """
+    id = models.AutoField(primary_key=True)
     avatar = models.CharField(max_length=300, default='https://avatars1.githubusercontent.com/u/71955670?s=40&v=4',
                               verbose_name="头像")
     mobile = models.CharField(max_length=11, default="", verbose_name="手机号")

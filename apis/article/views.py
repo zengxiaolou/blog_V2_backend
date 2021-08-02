@@ -2,8 +2,6 @@ import logging
 from datetime import date
 
 from django.db.models import Count
-from django_elasticsearch_dsl_drf.filter_backends import *
-from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from rest_framework import mixins, viewsets, status, permissions, filters
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,9 +9,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
 from apis.utils.pagination import MyPageNumberPagination
-from .documents import ArticleDocument, ArticleDraftDocument
-from .serialzers import ArticleDocumentSerializer, AddArticleSerializer, CategorySerializer, TagsSerializer, \
-    SaveArticleDraftSerializer, ArticleDraftDocumentSerializer, ArchiveSerializer, ArticleOverViewSerializer, \
+from .serialzers import AddArticleSerializer, CategorySerializer, TagsSerializer, \
     ArticleContentSerializer, ArticleCategoryTagsSerializer, ArticleTagSerializer
 from .models import Article, Category, Tags, ArticleDraft
 from apis.utils.utils.other import redis_handle
@@ -29,91 +25,7 @@ like_view_parm = [openapi.Parameter(name='user_id', in_=openapi.IN_QUERY, descri
 tag_param = [openapi.Parameter(name='tag', in_=openapi.IN_QUERY, description="标签名称", type=openapi.TYPE_STRING)]
 
 
-class ArticleDocumentView(BaseDocumentViewSet):
-    """已发表文章查询视图集"""
-    document = ArticleDocument
-    authentication_classes = ()
-    permission_classes = ()
-    serializer_class = ArticleDocumentSerializer
-    pagination_class = MyPageNumberPagination
-    lookup_field = 'id'
-    filter_backends = [
-        SearchFilterBackend,
-    ]
-    ordering_fields = {
-        'created': 'created'
-    }
-    ordering = ('-created',)
-    search_fields = ('title', 'content', 'summary', 'category.category', 'tag.tag')
 
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        redis_handle.incr(REDIS_PREFIX + 'view:' + str(instance.id), amount=1)
-        redis_handle.incr(REDIS_PREFIX + "total_view", amount=1)
-        today = date.today()
-        redis_handle.hincrby(COUNT_PREFIX + 'view', str(today), amount=1)
-        return Response(serializer.data)
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            res = self.get_paginated_response(serializer.data)
-            for i in res.data['results']:
-                view = redis_handle.get(REDIS_PREFIX + 'view:' + str(i['id']))
-                comment = redis_handle.get(REDIS_PREFIX + 'article_comment:' + str(i['id']))
-                i['comment'] = comment if comment else 0
-                i['view'] = view if view else 0
-                i['like'] = redis_handle.zcard(REDIS_PREFIX + 'article_like:' + str(i['id']))
-            return res
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-
-class ArchiveViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """获取文章归档"""
-    authentication_classes = ()
-    permission_classes = ()
-    serializer_class = ArchiveSerializer
-    queryset = Article.objects.all()
-
-
-class HeatMapViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """获取文章数量与日期"""
-    serializer_class = ArchiveSerializer
-    filter_backends = (filters.OrderingFilter,)
-    ordering = ('created',)
-
-    def get_queryset(self):
-        return Article.objects.values('created').annotate(test=sum('created')).all()
-
-
-class ArticleOverViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    """获取文章概览数据"""
-    serializer_class = ArticleOverViewSerializer
-    permission_classes = ()
-    authentication_classes = ()
-    queryset = Article.objects.all()
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.filter_queryset(self.get_queryset())
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            res = self.get_paginated_response(serializer.data)
-            for i in res.data['results']:
-                view = redis_handle.get(REDIS_PREFIX + 'view:' + str(i['id']))
-                comment = redis_handle.get(REDIS_PREFIX + 'article_comment:' + str(i['id']))
-                i['comment'] = comment if comment else 0
-                i['view'] = view if view else 0
-                i['like'] = redis_handle.zcard(REDIS_PREFIX + 'article_like:' + str(i['id']))
-            return res
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 
 
 class AddArticleViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixins.UpdateModelMixin,
@@ -145,27 +57,6 @@ class AddArticleViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin, mixi
         if tag:
             for i in tag:
                 redis_handle.hincrby(COUNT_PREFIX + 'tag', i.tag, amount=1)
-
-
-class SaveArticleDraftViewSet(mixins.CreateModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin,
-                              viewsets.GenericViewSet):
-    """文章草稿箱相关"""
-    permission_classes = (permissions.IsAdminUser,)
-    serializer_class = SaveArticleDraftSerializer
-    queryset = ArticleDraft.objects.all()
-
-
-class ArticleDraftViewSet(BaseDocumentViewSet):
-    """草稿查询"""
-    document = ArticleDraftDocument
-    serializer_class = ArticleDraftDocumentSerializer
-    pagination_class = MyPageNumberPagination
-    lookup_field = 'id'
-    filter_backends = [
-        SearchFilterBackend
-    ]
-    search_fields = ('title', 'content', 'summary', 'category.category', 'tag.tag')
-
 
 class GetCategoryViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """获取分类"""

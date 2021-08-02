@@ -26,7 +26,7 @@ DATABASES = {
 }
 
 # drf_yasg URL配置
-YASG_URL = 'http://0.0.0.0:8001/'
+YASG_URL = 'http://0.0.0.0:8000/'
 
 # 内存设置
 CACHES = {
@@ -47,13 +47,6 @@ CACHES = {
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
 # backend配置，这里使用redis
 CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/0'
-
-# Elasticsearch configuration
-ELASTICSEARCH_DSL = {
-    'default': {
-        'hosts': 'localhost:9200'
-    },
-}
 
 # redis配置
 REDIS_HOST = 'localhost'

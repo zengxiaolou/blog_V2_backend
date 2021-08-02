@@ -9,6 +9,7 @@ user = get_user_model()
 
 class Category(models.Model):
     """文章分类"""
+    id = models.AutoField(primary_key=True)
     category = models.CharField(max_length=10, null=False, unique=True, verbose_name="分类")
     num = models.IntegerField(default=0, verbose_name="文章数")
 
@@ -21,6 +22,7 @@ class Category(models.Model):
 
 class Tags(models.Model):
     """文章标签"""
+    id = models.AutoField(primary_key=True)
     tag = models.CharField(max_length=5, unique=True, verbose_name="标签")
     num = models.IntegerField(default=0)
 
@@ -33,6 +35,7 @@ class Tags(models.Model):
 
 class Article(models.Model):
     """已发布文章"""
+    id = models.AutoField(primary_key=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="article", verbose_name="文章分类")
     tag = models.ManyToManyField("Tags", related_name="article",  verbose_name='文章标签')
     title = models.CharField(max_length=100, verbose_name='文章标题')
@@ -57,6 +60,7 @@ class Article(models.Model):
 
 class ArticleDraft(models.Model):
     """文章草稿箱"""
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(user, on_delete=models.CASCADE, null=True, related_name="draft", verbose_name='用户信息')
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True, related_name="draft",
                                  verbose_name="文章分类")

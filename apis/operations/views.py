@@ -130,6 +130,7 @@ class CommentLikeViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin, view
     """用户对评论进行点赞和取消点赞"""
     permission_classes = (IsAuthenticated,)
     serializer_class = CommentLikeSerializer
+    queryset = Comment.objects.all()
 
     def perform_create(self, serializer):
         comment_id = serializer.validated_data['comment_id']

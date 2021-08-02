@@ -30,32 +30,6 @@ services:
       - "3306:3306"
     restart: always
 
-  es: 
-    image: elasticsearch:7.8.1
-    container_name: es
-    privileged: true
-    environment:
-      - cluster.name=elasticsearch-cluster
-      - node.name=node0
-      - node.master=true
-      - node.data=true
-      - bootstrap.memory_lock=true
-      - http.cors.enabled=true
-      - http.cors.allow-origin=*
-      - cluster.initial_master_nodes=node0
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - ./deployment/es/data/node0:/usr/share/elasticsearch/data
-      - ./deployment/es/logs/node0:/usr/share/elasticsearch/logs
-    ports:
-      - 9200:9200
-      - 9300:9300
-    restart: always
-
   web:
     build: .
     expose:
@@ -67,11 +41,9 @@ services:
     links:
       - redis
       - db
-      - es
     depends_on:
       - redis
       - db
-      - es
     restart: always
 
   celery:
@@ -84,11 +56,9 @@ services:
     links:
       - redis
       - db
-      - es
     depends_on:
       - redis
       - db
-      - es
     restart: always
 
   spider:

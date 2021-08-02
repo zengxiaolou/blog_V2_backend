@@ -16,6 +16,7 @@ Including another URLconf
 import os
 
 from django.conf.urls import url, include
+from django.urls import path
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -40,7 +41,7 @@ urlpatterns = [
     url(r'^redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     url(r'^api/(?P<version>[v1|2]+)/user/', include('apis.users.urls')),
     url(r'^api/(?P<version>[v1|2]+)/utils/', include('apis.utils.urls')),
-    url(r'^api/(?P<version>[v1|2]+)/article/', include('apis.article.urls')),
+    path(r'api/article/', include('apis.article.urls')),
     url(r'^api/(?P<version>[v1|2]+)/operations/', include('apis.operations.urls')),
     url(r'^api/(?P<version>[v1|2]+)/statistics/', include('apis.my_statistics.urls'))
 ]

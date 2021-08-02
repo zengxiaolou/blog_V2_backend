@@ -6,10 +6,8 @@ TIME:           2020/8/24-18:03
 INSTRUCTIONS:   文章序列化
 """
 from rest_framework import serializers
-from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
 from rest_framework.validators import UniqueValidator
 
-from .documents import ArticleDocument, ArticleDraftDocument
 from .models import Article, Category, Tags, ArticleDraft
 
 
@@ -33,18 +31,6 @@ class TagsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tags
         fields = '__all__'
-
-
-class ArticleDocumentSerializer(DocumentSerializer):
-    """已发表文章查询"""
-    class Meta(object):
-        document = ArticleDocument
-
-
-class ArticleDraftDocumentSerializer(DocumentSerializer):
-    """草稿查询"""
-    class Meta(object):
-        document = ArticleDraftDocument
 
 
 class AddArticleSerializer(serializers.ModelSerializer):

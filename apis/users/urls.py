@@ -12,6 +12,8 @@ from rest_framework import routers
 
 from .views import *
 
+app_name = 'users'
+
 router = routers.DefaultRouter()
 
 # 配置用户信息相关url

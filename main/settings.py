@@ -15,9 +15,6 @@ import sys
 import datetime
 import logging
 
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
-
 
 from main.keys import JWT_KEY, KEY_EMAIL_HOST_USER, KEY_EMAIL_HOST_PASSWORD, KEY_QINIU_ACCESS_KEY, \
     KEY_QINIU_SECRET_KEY, KEY_QINIU_BUCKET_NAME, KEY_SOCIAL_AUTH_GITHUB_KEY, KEY_SOCIAL_AUTH_GITHUB_SECRET,\
@@ -65,7 +62,6 @@ INSTALLED_APPS = [
     'drf_yasg',
     'django_filters',
     'extract_apps.rest_captcha',
-    'django_elasticsearch_dsl',
     'social_django',
 ]
 
@@ -238,7 +234,7 @@ JWT_AUTH = {
 }
 
 # 手机号正则表达式
-REGEX_MOBILE = "^1[354789]\d{9}$|^147\d{8}$|^176\d{8}$"
+REGEX_MOBILE = r"^1[354789]\d{9}$|^147\d{8}$|^176\d{8}$"
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_USE_SSL = True
@@ -308,13 +304,3 @@ SOCIAL_AUTH_PIPELINE = (
 SOCIAL_AUTH_GITHUB_KEY = KEY_SOCIAL_AUTH_GITHUB_KEY
 SOCIAL_AUTH_GITHUB_SECRET = KEY_SOCIAL_AUTH_GITHUB_SECRET
 
-
-sentry_sdk.init(
-    dsn=SENTRY_DNS,
-    integrations=[DjangoIntegration()],
-    traces_sample_rate=1.0,
-
-    # If you wish to associate users to errors (assuming you are using
-    # django.contrib.auth) you may enable sending PII data.
-    send_default_pii=True
-)
